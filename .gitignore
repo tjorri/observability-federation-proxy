@@ -1,0 +1,37 @@
+# Binaries
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of go coverage tool
+*.out
+coverage.html
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config with secrets
+config.yaml
+*.kubeconfig
+
+# Build artifacts
+dist/
+
+# E2E test artifacts
+e2e/kubeconfig
+e2e/testdata/config-generated.yaml

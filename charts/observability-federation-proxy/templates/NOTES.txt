@@ -1,0 +1,30 @@
+Observability Federation Proxy has been installed.
+
+1. Get the application URL:
+{{- if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "observability-federation-proxy.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+  You can watch the status by running:
+    kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "observability-federation-proxy.fullname" . }}
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "observability-federation-proxy.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "observability-federation-proxy.fullname" . }} 8080:{{ .Values.service.port }}
+  echo "Visit http://127.0.0.1:8080"
+{{- end }}
+
+2. Verify the installation:
+  curl http://localhost:8080/healthz
+  curl http://localhost:8080/api/v1/clusters
+
+3. Check the logs:
+  kubectl logs -f deployment/{{ include "observability-federation-proxy.fullname" . }} -n {{ .Release.Namespace }}
+
+{{- if .Values.serviceMonitor.enabled }}
+
+4. ServiceMonitor is enabled. Prometheus Operator will automatically discover and scrape metrics from:
+   /metrics endpoint
+{{- end }}

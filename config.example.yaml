@@ -1,0 +1,70 @@
+proxy:
+  listenAddress: ":8080"
+  queryTimeout: 30s
+  maxTenantHeaderLength: 8192
+  metricsEnabled: true
+
+auth:
+  enabled: false
+  # bearerTokens: ["token1", "token2"]  # Or use AUTH_BEARER_TOKENS env var
+
+logging:
+  level: info
+  format: json  # or "text" for human-readable
+
+clusters:
+  # EKS cluster with implicit credentials (IRSA, Pod Identity, instance role)
+  - name: prod-eu
+    type: eks
+    eks:
+      clusterName: my-prod-eu
+      region: eu-west-1
+    loki:
+      namespace: observability
+      service: loki-gateway
+      port: 80
+      pathPrefix: /loki  # Loki API path prefix (use /loki for loki-gateway)
+    mimir:
+      namespace: observability
+      service: mimir-gateway
+      port: 80
+      pathPrefix: /prometheus  # Mimir Prometheus-compatible API prefix
+    tenants:
+      includePatterns:
+        - "^team-.*"
+      excludePatterns:
+        - "^kube-.*"
+        - "^observability$"
+      refreshInterval: 60s
+
+  # EKS cluster with role assumption (cross-account)
+  - name: prod-us
+    type: eks
+    eks:
+      clusterName: my-prod-us
+      region: us-east-1
+      assumeRole:
+        roleArn: arn:aws:iam::111122223333:role/ObsFederation
+    loki:
+      namespace: monitoring
+      service: loki
+      port: 3100
+      pathPrefix: /loki
+    tenants:
+      refreshInterval: 120s
+
+  # Non-EKS cluster with kubeconfig
+  - name: on-prem
+    type: kubeconfig
+    kubeconfig:
+      path: /etc/proxy/kubeconfigs/on-prem.yaml
+    loki:
+      namespace: observability
+      service: loki-gateway
+      port: 80
+      pathPrefix: /loki
+    mimir:
+      namespace: observability
+      service: mimir-gateway
+      port: 80
+      pathPrefix: /prometheus
