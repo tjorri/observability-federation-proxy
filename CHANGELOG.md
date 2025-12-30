@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.3](https://github.com/tjorri/observability-federation-proxy/compare/v0.0.2...v0.0.3) (2025-12-30)
+
+
+### Bug Fixes
+
+* **ci:** trigger release workflow only on tag push ([0a22030](https://github.com/tjorri/observability-federation-proxy/commit/0a22030695e773df899ef69da5250d9433600ff7))
+* let GoReleaser handle GitHub releases instead of release-please ([cbef47e](https://github.com/tjorri/observability-federation-proxy/commit/cbef47e3fcc129f66d20d8c2ba7c026f30d2db3a))
+* update Docker image license labels to Apache-2.0 ([1019dfd](https://github.com/tjorri/observability-federation-proxy/commit/1019dfd2a10dd64bc88e24a97d453eced8d706a7))
+
 ## [0.0.2](https://github.com/tjorri/observability-federation-proxy/compare/v0.0.1...v0.0.2) (2025-12-30)
 
 
