@@ -29,6 +29,7 @@ linters:
         - fmt.Fprint
         - fmt.Fprintf
         - fmt.Fprintln
+        - (k8s.io/client-go/tools/cache.SharedInformer).AddEventHandler
     govet:
       enable-all: true
       disable:

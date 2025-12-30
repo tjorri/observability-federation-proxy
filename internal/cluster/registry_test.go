@@ -7,8 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tjorri/observability-federation-proxy/internal/config"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/tjorri/observability-federation-proxy/internal/config"
 )
 
 func TestRegistry_GetAndList(t *testing.T) {
