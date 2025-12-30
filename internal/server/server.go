@@ -22,6 +22,7 @@ import (
 	"github.com/tjorri/observability-federation-proxy/internal/tenant"
 )
 
+// Server is the main HTTP server that handles all proxy requests.
 type Server struct {
 	config         *config.Config
 	registry       *cluster.Registry
@@ -32,6 +33,7 @@ type Server struct {
 	mux            *http.ServeMux
 }
 
+// New creates a new Server with the given configuration and registries.
 func New(cfg *config.Config, registry *cluster.Registry, tenantRegistry *tenant.Registry) *Server {
 	s := &Server{
 		config:         cfg,
@@ -194,6 +196,7 @@ func (s *Server) registerMimirRoutes() {
 	mimirRouter.RegisterRoutes(s.mux, "/clusters/{cluster}/mimir")
 }
 
+// Run starts the HTTP server and blocks until shutdown.
 func (s *Server) Run() error {
 	errChan := make(chan error, 1)
 	go func() {
@@ -232,14 +235,15 @@ func (s *Server) Shutdown() error {
 	return s.httpServer.Shutdown(ctx)
 }
 
+// Handler returns the HTTP handler for testing purposes.
 func (s *Server) Handler() http.Handler {
 	return s.mux
 }
 
-func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
 
 func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
@@ -247,7 +251,7 @@ func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
 
 	if s.registry == nil {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 		return
 	}
 
@@ -276,13 +280,13 @@ func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
 
 	if allHealthy {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":   "ok",
 			"clusters": clusterStatus,
 		})
 	} else {
 		w.WriteHeader(http.StatusServiceUnavailable)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":   "degraded",
 			"clusters": clusterStatus,
 		})

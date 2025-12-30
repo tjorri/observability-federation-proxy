@@ -149,14 +149,14 @@ func (c *Client) ProxyRequest(ctx context.Context, req *Request) (*Response, err
 	}, nil
 }
 
-// ProxyHTTPOptions contains options for ProxyHTTP.
-type ProxyHTTPOptions struct {
+// HTTPOptions contains options for ProxyHTTP.
+type HTTPOptions struct {
 	// AdditionalHeaders are headers to add to the proxied request.
 	AdditionalHeaders http.Header
 }
 
 // ProxyHTTP is a convenience method that proxies an http.Request and writes to http.ResponseWriter.
-func (c *Client) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request, pathPrefix string, opts *ProxyHTTPOptions) {
+func (c *Client) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request, pathPrefix string, opts *HTTPOptions) {
 	// Strip the path prefix to get the actual API path
 	path := strings.TrimPrefix(r.URL.Path, pathPrefix)
 	if path == "" {
@@ -167,7 +167,7 @@ func (c *Client) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.R
 	var body io.Reader
 	if r.Body != nil {
 		body = r.Body
-		defer r.Body.Close()
+		defer func() { _ = r.Body.Close() }()
 	}
 
 	// Build headers
@@ -195,7 +195,7 @@ func (c *Client) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.R
 		log.Error().Err(err).Msg("proxy request failed")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadGateway)
-		fmt.Fprintf(w, `{"error": "proxy request failed: %s"}`, err.Error())
+		_, _ = fmt.Fprintf(w, `{"error": "proxy request failed: %s"}`, err.Error())
 		return
 	}
 
@@ -214,7 +214,7 @@ func (c *Client) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.R
 	// Write response
 	w.WriteHeader(resp.StatusCode)
 	if resp.Body != nil {
-		w.Write(resp.Body)
+		_, _ = w.Write(resp.Body)
 	}
 }
 

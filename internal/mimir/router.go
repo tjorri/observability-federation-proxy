@@ -15,7 +15,7 @@ import (
 
 // ProxyClient defines the interface for proxying HTTP requests.
 type ProxyClient interface {
-	ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request, pathPrefix string, opts *proxy.ProxyHTTPOptions)
+	ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request, pathPrefix string, opts *proxy.HTTPOptions)
 }
 
 // Router handles Mimir/Prometheus API requests and routes them to the appropriate cluster.
@@ -338,7 +338,7 @@ func (r *Router) proxyRequest(w http.ResponseWriter, req *http.Request, clusterN
 }
 
 // buildProxyOptions builds proxy options with tenant headers.
-func (r *Router) buildProxyOptions(clusterName string) *proxy.ProxyHTTPOptions {
+func (r *Router) buildProxyOptions(clusterName string) *proxy.HTTPOptions {
 	if r.tenantRegistry == nil {
 		return nil
 	}
@@ -351,7 +351,7 @@ func (r *Router) buildProxyOptions(clusterName string) *proxy.ProxyHTTPOptions {
 	headers := make(http.Header)
 	headers.Set("X-Scope-OrgID", orgID)
 
-	return &proxy.ProxyHTTPOptions{
+	return &proxy.HTTPOptions{
 		AdditionalHeaders: headers,
 	}
 }
@@ -360,7 +360,7 @@ func (r *Router) buildProxyOptions(clusterName string) *proxy.ProxyHTTPOptions {
 func (r *Router) writeError(w http.ResponseWriter, statusCode int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(map[string]string{"error": message})
+	_ = json.NewEncoder(w).Encode(map[string]string{"error": message})
 }
 
 // PrometheusResponse represents a standard Prometheus/Mimir API response.

@@ -9,13 +9,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config is the root configuration for the proxy.
 type Config struct {
-	Proxy    ProxyConfig    `mapstructure:"proxy"`
-	Auth     AuthConfig     `mapstructure:"auth"`
-	Logging  LoggingConfig  `mapstructure:"logging"`
+	Proxy    ProxyConfig     `mapstructure:"proxy"`
+	Auth     AuthConfig      `mapstructure:"auth"`
+	Logging  LoggingConfig   `mapstructure:"logging"`
 	Clusters []ClusterConfig `mapstructure:"clusters"`
 }
 
+// ProxyConfig contains HTTP server and proxy settings.
 type ProxyConfig struct {
 	ListenAddress         string        `mapstructure:"listenAddress"`
 	QueryTimeout          time.Duration `mapstructure:"queryTimeout"`
@@ -23,43 +25,50 @@ type ProxyConfig struct {
 	MetricsEnabled        bool          `mapstructure:"metricsEnabled"`
 }
 
+// AuthConfig contains authentication settings.
 type AuthConfig struct {
 	Enabled      bool     `mapstructure:"enabled"`
 	BearerTokens []string `mapstructure:"bearerTokens"`
 }
 
+// LoggingConfig contains logging settings.
 type LoggingConfig struct {
 	Level  string `mapstructure:"level"`
 	Format string `mapstructure:"format"`
 }
 
+// ClusterConfig defines a Kubernetes cluster to proxy to.
 type ClusterConfig struct {
-	Name       string           `mapstructure:"name"`
-	Type       string           `mapstructure:"type"`
-	EKS        *EKSConfig       `mapstructure:"eks,omitempty"`
+	Name       string            `mapstructure:"name"`
+	Type       string            `mapstructure:"type"`
+	EKS        *EKSConfig        `mapstructure:"eks,omitempty"`
 	Kubeconfig *KubeconfigConfig `mapstructure:"kubeconfig,omitempty"`
-	Loki       *ServiceConfig   `mapstructure:"loki,omitempty"`
-	Mimir      *ServiceConfig   `mapstructure:"mimir,omitempty"`
-	Tenants    TenantsConfig    `mapstructure:"tenants"`
+	Loki       *ServiceConfig    `mapstructure:"loki,omitempty"`
+	Mimir      *ServiceConfig    `mapstructure:"mimir,omitempty"`
+	Tenants    TenantsConfig     `mapstructure:"tenants"`
 }
 
+// EKSConfig contains AWS EKS cluster authentication settings.
 type EKSConfig struct {
-	ClusterName string          `mapstructure:"clusterName"`
-	Region      string          `mapstructure:"region"`
+	ClusterName string            `mapstructure:"clusterName"`
+	Region      string            `mapstructure:"region"`
 	AssumeRole  *AssumeRoleConfig `mapstructure:"assumeRole,omitempty"`
 }
 
+// AssumeRoleConfig contains AWS IAM role assumption settings.
 type AssumeRoleConfig struct {
 	RoleARN     string `mapstructure:"roleArn"`
 	ExternalID  string `mapstructure:"externalId,omitempty"`
 	SessionName string `mapstructure:"sessionName,omitempty"`
 }
 
+// KubeconfigConfig contains kubeconfig-based authentication settings.
 type KubeconfigConfig struct {
 	Path string `mapstructure:"path"`
 	Data string `mapstructure:"data"`
 }
 
+// ServiceConfig defines a Kubernetes service to proxy to.
 type ServiceConfig struct {
 	Namespace  string `mapstructure:"namespace"`
 	Service    string `mapstructure:"service"`
@@ -67,12 +76,14 @@ type ServiceConfig struct {
 	PathPrefix string `mapstructure:"pathPrefix"`
 }
 
+// TenantsConfig contains tenant discovery settings.
 type TenantsConfig struct {
 	IncludePatterns []string      `mapstructure:"includePatterns"`
 	ExcludePatterns []string      `mapstructure:"excludePatterns"`
 	RefreshInterval time.Duration `mapstructure:"refreshInterval"`
 }
 
+// Load reads configuration from file and environment variables.
 func Load() (*Config, error) {
 	cfg := &Config{}
 
@@ -110,6 +121,7 @@ func setDefaults() {
 	viper.SetDefault("logging.format", "json")
 }
 
+// Validate checks the configuration for required fields and valid values.
 func (c *Config) Validate() error {
 	if c.Proxy.ListenAddress == "" {
 		return fmt.Errorf("proxy.listenAddress is required")

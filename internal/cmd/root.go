@@ -110,6 +110,7 @@ func setupLogging(cfg config.LoggingConfig) {
 	}
 }
 
+// Execute runs the root command with the given version string.
 func Execute(version string) error {
 	return newRootCmd(version).Execute()
 }

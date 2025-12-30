@@ -27,11 +27,12 @@ func (r *Registry) createKubeconfigCluster(cfg config.ClusterConfig) (*Cluster, 
 	}
 
 	var restCfg *rest.Config
+	var data []byte
 	var err error
 
 	if cfg.Kubeconfig.Data != "" {
 		// Load from inline base64-encoded kubeconfig
-		data, err := base64.StdEncoding.DecodeString(cfg.Kubeconfig.Data)
+		data, err = base64.StdEncoding.DecodeString(cfg.Kubeconfig.Data)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode kubeconfig data: %w", err)
 		}
@@ -41,7 +42,7 @@ func (r *Registry) createKubeconfigCluster(cfg config.ClusterConfig) (*Cluster, 
 		}
 	} else if cfg.Kubeconfig.Path != "" {
 		// Load from file path
-		data, err := os.ReadFile(cfg.Kubeconfig.Path)
+		data, err = os.ReadFile(cfg.Kubeconfig.Path)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read kubeconfig file: %w", err)
 		}

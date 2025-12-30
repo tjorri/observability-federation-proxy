@@ -98,19 +98,25 @@ func NewWatcher(cfg WatcherConfig) (*Watcher, error) {
 	}
 
 	// Add event handlers
-	namespaceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
+	_, _ = namespaceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(_ interface{}) {
 			w.onNamespaceChange()
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			// Only refresh if namespace name changed (unlikely but possible via replace)
-			oldNs := oldObj.(*corev1.Namespace)
-			newNs := newObj.(*corev1.Namespace)
+			oldNs, ok := oldObj.(*corev1.Namespace)
+			if !ok {
+				return
+			}
+			newNs, ok := newObj.(*corev1.Namespace)
+			if !ok {
+				return
+			}
 			if oldNs.Name != newNs.Name {
 				w.onNamespaceChange()
 			}
 		},
-		DeleteFunc: func(obj interface{}) {
+		DeleteFunc: func(_ interface{}) {
 			w.onNamespaceChange()
 		},
 	})

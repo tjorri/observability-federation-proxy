@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"bytes"
 	"io"
 	"net/http"
 	"net/url"
@@ -13,7 +12,7 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	k8sClient := fake.NewSimpleClientset()
+	k8sClient := fake.NewSimpleClientset() //nolint:staticcheck // NewClientset requires generated apply configs
 
 	tests := []struct {
 		name    string
@@ -118,7 +117,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestClient_buildProxyPath(t *testing.T) {
-	k8sClient := fake.NewSimpleClientset()
+	k8sClient := fake.NewSimpleClientset() //nolint:staticcheck // NewClientset requires generated apply configs
 	client, err := NewClient(ClientConfig{
 		K8sClient: k8sClient,
 		Namespace: "observability",
@@ -261,7 +260,7 @@ func TestClient_ProxyHTTP_PathStripping(t *testing.T) {
 	// This test verifies that path prefixes are correctly stripped
 	// The actual proxying requires a real K8s API server, so we test the path logic
 
-	k8sClient := fake.NewSimpleClientset()
+	k8sClient := fake.NewSimpleClientset() //nolint:staticcheck // NewClientset requires generated apply configs
 	client, err := NewClient(ClientConfig{
 		K8sClient: k8sClient,
 		Namespace: "observability",
@@ -308,31 +307,6 @@ func TestClient_ProxyHTTP_PathStripping(t *testing.T) {
 			}
 		})
 	}
-}
-
-// mockResponseWriter helps test ProxyHTTP error handling
-type mockResponseWriter struct {
-	headers    http.Header
-	statusCode int
-	body       bytes.Buffer
-}
-
-func newMockResponseWriter() *mockResponseWriter {
-	return &mockResponseWriter{
-		headers: make(http.Header),
-	}
-}
-
-func (m *mockResponseWriter) Header() http.Header {
-	return m.headers
-}
-
-func (m *mockResponseWriter) Write(b []byte) (int, error) {
-	return m.body.Write(b)
-}
-
-func (m *mockResponseWriter) WriteHeader(statusCode int) {
-	m.statusCode = statusCode
 }
 
 func TestClient_ProxyHTTP_Integration(t *testing.T) {

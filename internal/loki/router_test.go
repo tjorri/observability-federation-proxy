@@ -20,7 +20,7 @@ type mockProxyClient struct {
 	statusCode  int
 }
 
-func (m *mockProxyClient) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.Request, pathPrefix string, opts *proxy.ProxyHTTPOptions) {
+func (m *mockProxyClient) ProxyHTTP(_ context.Context, w http.ResponseWriter, r *http.Request, pathPrefix string, opts *proxy.HTTPOptions) {
 	m.lastPath = strings.TrimPrefix(r.URL.Path, pathPrefix)
 	if opts != nil {
 		m.lastHeaders = opts.AdditionalHeaders

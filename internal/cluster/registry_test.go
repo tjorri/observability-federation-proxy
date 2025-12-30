@@ -17,11 +17,11 @@ func TestRegistry_GetAndList(t *testing.T) {
 		clusters: map[string]*Cluster{
 			"cluster-a": {
 				Name:   "cluster-a",
-				Client: fake.NewSimpleClientset(),
+				Client: fake.NewSimpleClientset(), //nolint:staticcheck // NewClientset requires generated apply configs
 			},
 			"cluster-b": {
 				Name:   "cluster-b",
-				Client: fake.NewSimpleClientset(),
+				Client: fake.NewSimpleClientset(), //nolint:staticcheck // NewClientset requires generated apply configs
 			},
 		},
 	}
@@ -63,7 +63,7 @@ func TestRegistry_HealthCheck(t *testing.T) {
 		clusters: map[string]*Cluster{
 			"healthy": {
 				Name:   "healthy",
-				Client: fake.NewSimpleClientset(),
+				Client: fake.NewSimpleClientset(), //nolint:staticcheck // NewClientset requires generated apply configs
 			},
 		},
 	}
