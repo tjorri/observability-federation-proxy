@@ -1,0 +1,124 @@
+# Default values for observability-federation-proxy.
+
+replicaCount: 1
+
+image:
+  repository: observability-federation-proxy
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  fsGroup: 65534
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Proxy configuration
+proxy:
+  listenAddress: ":8080"
+  queryTimeout: "30s"
+  maxTenantHeaderLength: 8192
+  metricsEnabled: true
+
+# Authentication configuration
+auth:
+  enabled: false
+  # Bearer tokens for authentication (store in a Secret for production use)
+  bearerTokens: []
+  # Reference to an existing secret containing bearer tokens
+  # existingSecret: ""
+  # Key in the existing secret that contains the tokens (comma-separated)
+  # existingSecretKey: "tokens"
+
+# Logging configuration
+logging:
+  level: "info"
+  format: "json"
+
+# Cluster configurations
+# Each cluster can have Loki and/or Mimir endpoints configured
+clusters: []
+#  - name: prod-eu
+#    type: eks
+#    eks:
+#      clusterName: production-eu-west-1
+#      region: eu-west-1
+#      assumeRole:
+#        roleArn: arn:aws:iam::123456789012:role/ObservabilityFederationProxy
+#    loki:
+#      namespace: monitoring
+#      service: loki-gateway
+#      port: 80
+#    mimir:
+#      namespace: monitoring
+#      service: mimir-gateway
+#      port: 80
+#    tenants:
+#      includePatterns:
+#        - ".*"
+#      excludePatterns:
+#        - "^kube-.*"
+#      refreshInterval: "5m"
+
+# ServiceMonitor for Prometheus Operator
+serviceMonitor:
+  enabled: false
+  namespace: ""
+  interval: "30s"
+  scrapeTimeout: "10s"
+  labels: {}
+
+# Liveness and readiness probes
+probes:
+  liveness:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
