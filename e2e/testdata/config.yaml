@@ -1,0 +1,37 @@
+proxy:
+  listenAddress: ":18080"
+  queryTimeout: 30s
+  maxTenantHeaderLength: 8192
+  metricsEnabled: true
+
+auth:
+  enabled: false
+
+logging:
+  level: debug
+  format: text
+
+clusters:
+  - name: e2e-cluster
+    type: kubeconfig
+    kubeconfig:
+      path: ""  # Will be set via KUBECONFIG env var
+    loki:
+      namespace: observability
+      service: loki
+      port: 3100
+      pathPrefix: /loki
+    mimir:
+      namespace: observability
+      service: mimir
+      port: 8080
+      pathPrefix: /prometheus
+    tenants:
+      includePatterns:
+        - "^tenant-.*"
+      excludePatterns:
+        - "^kube-.*"
+        - "^observability$"
+        - "^default$"
+        - "^local-path-storage$"
+      refreshInterval: 5s
