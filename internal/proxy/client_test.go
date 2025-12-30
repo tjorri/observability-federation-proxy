@@ -12,7 +12,7 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	k8sClient := fake.NewSimpleClientset() //nolint:staticcheck // NewClientset requires generated apply configs
+	k8sClient := fake.NewSimpleClientset()
 
 	tests := []struct {
 		name    string
@@ -117,7 +117,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestClient_buildProxyPath(t *testing.T) {
-	k8sClient := fake.NewSimpleClientset() //nolint:staticcheck // NewClientset requires generated apply configs
+	k8sClient := fake.NewSimpleClientset()
 	client, err := NewClient(ClientConfig{
 		K8sClient: k8sClient,
 		Namespace: "observability",
@@ -260,7 +260,7 @@ func TestClient_ProxyHTTP_PathStripping(t *testing.T) {
 	// This test verifies that path prefixes are correctly stripped
 	// The actual proxying requires a real K8s API server, so we test the path logic
 
-	k8sClient := fake.NewSimpleClientset() //nolint:staticcheck // NewClientset requires generated apply configs
+	k8sClient := fake.NewSimpleClientset()
 	client, err := NewClient(ClientConfig{
 		K8sClient: k8sClient,
 		Namespace: "observability",

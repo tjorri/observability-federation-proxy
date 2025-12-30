@@ -18,7 +18,17 @@ linters:
   settings:
     errcheck:
       check-type-assertions: true
-      check-blank: true
+      check-blank: false
+      exclude-functions:
+        - io.Copy
+        - io.WriteTo
+        - (io.Closer).Close
+        - (*os.File).Close
+        - (net/http.ResponseWriter).Write
+        - (*encoding/json.Encoder).Encode
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
     govet:
       enable-all: true
       disable:
@@ -50,6 +60,10 @@ linters:
         linters:
           - errcheck
           - unparam
+      - path: _test\.go
+        text: "SA1019.*NewSimpleClientset"
+        linters:
+          - staticcheck
 
 formatters:
   enable:

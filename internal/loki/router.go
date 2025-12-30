@@ -337,7 +337,7 @@ func (r *Router) buildProxyOptions(clusterName string) *proxy.HTTPOptions {
 func (r *Router) writeError(w http.ResponseWriter, statusCode int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	_ = json.NewEncoder(w).Encode(map[string]string{"error": message})
+	json.NewEncoder(w).Encode(map[string]string{"error": message})
 }
 
 // Response represents a standard Loki API response.

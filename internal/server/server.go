@@ -243,7 +243,7 @@ func (s *Server) Handler() http.Handler {
 func (s *Server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
 
 func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
@@ -251,7 +251,7 @@ func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
 
 	if s.registry == nil {
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 		return
 	}
 
@@ -280,13 +280,13 @@ func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
 
 	if allHealthy {
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":   "ok",
 			"clusters": clusterStatus,
 		})
 	} else {
 		w.WriteHeader(http.StatusServiceUnavailable)
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":   "degraded",
 			"clusters": clusterStatus,
 		})

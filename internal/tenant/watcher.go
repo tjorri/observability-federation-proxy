@@ -98,7 +98,7 @@ func NewWatcher(cfg WatcherConfig) (*Watcher, error) {
 	}
 
 	// Add event handlers
-	_, _ = namespaceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	namespaceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(_ interface{}) {
 			w.onNamespaceChange()
 		},

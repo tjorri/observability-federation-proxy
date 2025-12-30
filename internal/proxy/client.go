@@ -167,7 +167,7 @@ func (c *Client) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.R
 	var body io.Reader
 	if r.Body != nil {
 		body = r.Body
-		defer func() { _ = r.Body.Close() }()
+		defer r.Body.Close()
 	}
 
 	// Build headers
@@ -195,7 +195,7 @@ func (c *Client) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.R
 		log.Error().Err(err).Msg("proxy request failed")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadGateway)
-		_, _ = fmt.Fprintf(w, `{"error": "proxy request failed: %s"}`, err.Error())
+		fmt.Fprintf(w, `{"error": "proxy request failed: %s"}`, err.Error())
 		return
 	}
 
@@ -214,7 +214,7 @@ func (c *Client) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.R
 	// Write response
 	w.WriteHeader(resp.StatusCode)
 	if resp.Body != nil {
-		_, _ = w.Write(resp.Body)
+		w.Write(resp.Body)
 	}
 }
 
