@@ -96,8 +96,41 @@ logging:
   # -- Log format (json, text)
   format: "json"
 
-# -- Cluster configurations. Each cluster can have Loki and/or Mimir endpoints configured
+# Cluster secrets configuration for kubeconfig-based authentication.
+# For EKS clusters, use IRSA (IAM Roles for Service Accounts) instead - no secrets needed.
+# See the chart README for security best practices.
+clusterSecrets:
+  # -- Create a secret containing kubeconfig files for non-EKS clusters
+  create: false
+  # -- Reference to an existing secret containing kubeconfig files (alternative to create)
+  existingSecret: ""
+  # -- Kubeconfig contents keyed by name. Each key becomes a file in /etc/kubeconfigs/.
+  # For production, use existingSecret with External Secrets Operator or sealed-secrets instead.
+  # @default -- `{}`
+  kubeconfigs: {}
+  #   on-prem: |
+  #     apiVersion: v1
+  #     kind: Config
+  #     clusters:
+  #       - cluster:
+  #           server: https://kubernetes.example.com:6443
+  #           certificate-authority-data: <base64>
+  #         name: on-prem
+  #     contexts:
+  #       - context:
+  #           cluster: on-prem
+  #           user: federation-proxy
+  #         name: on-prem
+  #     current-context: on-prem
+  #     users:
+  #       - name: federation-proxy
+  #         user:
+  #           token: <token>
+
+# -- Cluster configurations. Each cluster can have Loki and/or Mimir endpoints configured.
+# For kubeconfig clusters, reference the kubeconfig by path from clusterSecrets.
 clusters: []
+# Example EKS cluster (uses IRSA - no secrets needed):
 #  - name: prod-eu
 #    type: eks
 #    eks:
@@ -121,6 +154,20 @@ clusters: []
 #      excludePatterns:
 #        - "^kube-.*"
 #      refreshInterval: "5m"
+#
+# Example kubeconfig cluster (uses secret from clusterSecrets):
+#  - name: on-prem
+#    type: kubeconfig
+#    kubeconfig:
+#      path: /etc/kubeconfigs/on-prem  # Must match key in clusterSecrets.kubeconfigs
+#    loki:
+#      namespace: observability
+#      service: loki
+#      port: 3100
+#      pathPrefix: /loki
+#    tenants:
+#      includePatterns:
+#        - ".*"
 
 # ServiceMonitor for Prometheus Operator
 serviceMonitor:

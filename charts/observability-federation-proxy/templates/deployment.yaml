@@ -16,6 +16,9 @@ spec:
         {{- if and .Values.auth.enabled (not .Values.auth.existingSecret) }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- end }}
+        {{- if .Values.clusterSecrets.create }}
+        checksum/kubeconfigs: {{ include (print $.Template.BasePath "/kubeconfig-secret.yaml") . | sha256sum }}
+        {{- end }}
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -69,6 +72,11 @@ spec:
             - name: config
               mountPath: /etc/observability-federation-proxy
               readOnly: true
+            {{- if or .Values.clusterSecrets.create .Values.clusterSecrets.existingSecret }}
+            - name: kubeconfigs
+              mountPath: /etc/kubeconfigs
+              readOnly: true
+            {{- end }}
           {{- if .Values.auth.enabled }}
           env:
             - name: AUTH_BEARER_TOKENS
@@ -86,6 +94,11 @@ spec:
         - name: config
           configMap:
             name: {{ include "observability-federation-proxy.fullname" . }}
+        {{- if or .Values.clusterSecrets.create .Values.clusterSecrets.existingSecret }}
+        - name: kubeconfigs
+          secret:
+            secretName: {{ .Values.clusterSecrets.existingSecret | default (printf "%s-kubeconfigs" (include "observability-federation-proxy.fullname" .)) }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
