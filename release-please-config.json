@@ -19,7 +19,19 @@
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
-      "release-type": "go"
+      "release-type": "go",
+      "extra-files": [
+        {
+          "type": "yaml",
+          "path": "charts/observability-federation-proxy/Chart.yaml",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "yaml",
+          "path": "charts/observability-federation-proxy/Chart.yaml",
+          "jsonpath": "$.appVersion"
+        }
+      ]
     }
   }
 }
