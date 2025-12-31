@@ -1,4 +1,5 @@
-.PHONY: build test lint run clean docker-build docker-push e2e e2e-setup e2e-run e2e-teardown
+.PHONY: build test lint run clean docker-build docker-push e2e e2e-setup e2e-run e2e-teardown \
+        helm-lint helm-template helm-docs helm-docs-check helm-test
 
 BINARY_NAME=observability-federation-proxy
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -74,3 +75,23 @@ e2e-logs:
 	@echo "==> Showing e2e cluster logs"
 	KUBECONFIG=$(E2E_DIR)/kubeconfig kubectl logs -n observability -l app=loki --tail=100 || true
 	KUBECONFIG=$(E2E_DIR)/kubeconfig kubectl logs -n observability -l app=mimir --tail=100 || true
+
+## Helm chart
+
+CHART_DIR := charts/observability-federation-proxy
+
+helm-lint:
+	helm lint $(CHART_DIR)
+
+helm-template:
+	helm template test $(CHART_DIR) --debug > /dev/null
+
+helm-docs:
+	helm-docs --chart-search-root=charts
+
+helm-docs-check:
+	helm-docs --chart-search-root=charts --dry-run | diff -q $(CHART_DIR)/README.md - > /dev/null || \
+		(echo "README.md is out of date. Run 'make helm-docs' to update." && exit 1)
+
+helm-test: helm-lint helm-template helm-docs-check
+	@echo "==> Helm chart tests passed"

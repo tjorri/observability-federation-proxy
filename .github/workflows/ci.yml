@@ -67,3 +67,28 @@ jobs:
 
       - name: Build
         run: go build -ldflags="-s -w" -o bin/observability-federation-proxy ./cmd/proxy
+
+  helm:
+    name: Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm lint
+        run: make helm-lint
+
+      - name: Helm template
+        run: make helm-template
+
+      - name: Install helm-docs
+        run: |
+          HELM_DOCS_VERSION=1.14.2
+          curl -sSL "https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_x86_64.tar.gz" | tar xz
+          sudo mv helm-docs /usr/local/bin/
+
+      - name: Check helm-docs
+        run: make helm-docs-check
