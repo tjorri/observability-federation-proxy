@@ -1,5 +1,11 @@
 # Observability Federation Proxy
 
+[![CI](https://github.com/tjorri/observability-federation-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/tjorri/observability-federation-proxy/actions/workflows/ci.yml)
+[![E2E](https://github.com/tjorri/observability-federation-proxy/actions/workflows/e2e.yaml/badge.svg)](https://github.com/tjorri/observability-federation-proxy/actions/workflows/e2e.yaml)
+[![Release](https://img.shields.io/github/v/release/tjorri/observability-federation-proxy)](https://github.com/tjorri/observability-federation-proxy/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tjorri/observability-federation-proxy)](https://goreportcard.com/report/github.com/tjorri/observability-federation-proxy)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 A lightweight proxy that federates observability queries across multiple Kubernetes clusters. It provides a unified API for querying Loki (logs) and Mimir (metrics) across different clusters while handling multi-tenant authentication automatically.
 
 ## Features
