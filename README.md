@@ -147,12 +147,17 @@ clusters:
 
 ### Helm
 
+The chart is available via the GitHub OCI registry:
+
 ```bash
-helm install observability-federation-proxy ./charts/observability-federation-proxy \
+helm install observability-federation-proxy \
+  oci://ghcr.io/tjorri/charts/observability-federation-proxy \
   --namespace observability \
   --create-namespace \
   -f values.yaml
 ```
+
+See the [chart documentation](charts/observability-federation-proxy/README.md) for all available values and configuration options.
 
 ### Docker
 
@@ -172,6 +177,12 @@ make test
 
 # Unit tests with verbose output
 make test-verbose
+
+# Helm chart validation
+make helm-test    # Run all Helm validations (lint, template, docs)
+make helm-lint    # Lint the chart
+make helm-template # Validate template rendering
+make helm-docs    # Regenerate chart README
 
 # End-to-end tests (requires Docker for kind cluster)
 make e2e
