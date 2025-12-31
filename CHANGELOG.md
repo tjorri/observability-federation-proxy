@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.4](https://github.com/tjorri/observability-federation-proxy/compare/v0.0.3...v0.0.4) (2025-12-31)
+
+
+### Features
+
+* configure release-please to update Helm chart version ([e34ff7e](https://github.com/tjorri/observability-federation-proxy/commit/e34ff7e7bacdff928ad3f11d1605286970a5783c))
+* **helm:** add helm-docs with pre-commit hook ([7b1a498](https://github.com/tjorri/observability-federation-proxy/commit/7b1a49888b0d19083286a8b5667766a6af4d8ab0))
+* **helm:** add secure kubeconfig handling with documentation ([97dc706](https://github.com/tjorri/observability-federation-proxy/commit/97dc70696d1171063ee44dd3e6037e062c40b428))
+
+
+### Bug Fixes
+
+* allow release-please to create releases (GoReleaser will replace) ([0d4997e](https://github.com/tjorri/observability-federation-proxy/commit/0d4997e550d597ea2ad46823ca53a1b3789f851e))
+* **ci:** e2e workflow does not contain permissions ([#6](https://github.com/tjorri/observability-federation-proxy/issues/6)) ([f18b1e4](https://github.com/tjorri/observability-federation-proxy/commit/f18b1e4c951bfa0588749044addfd244ea45b96b))
+* **helm:** update default image repository to ghcr.io ([7f94820](https://github.com/tjorri/observability-federation-proxy/commit/7f948206b972c21ad24b0732a5782215f13a0d8e))
+
 ## [0.0.3](https://github.com/tjorri/observability-federation-proxy/compare/v0.0.2...v0.0.3) (2025-12-30)
 
 
