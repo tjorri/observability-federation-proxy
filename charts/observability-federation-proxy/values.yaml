@@ -1,33 +1,41 @@
 # Default values for observability-federation-proxy.
 
+# -- Number of replicas for the deployment
 replicaCount: 1
 
 image:
+  # -- Image repository
   repository: ghcr.io/tjorri/observability-federation-proxy
+  # -- Image pull policy
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- Overrides the image tag whose default is the chart appVersion
   tag: ""
 
+# -- Image pull secrets for private registries
 imagePullSecrets: []
+# -- Override the name of the chart
 nameOverride: ""
+# -- Override the full name of the chart
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
   name: ""
 
+# -- Annotations to add to the pod
 podAnnotations: {}
 
+# -- Pod security context
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 65534
   fsGroup: 65534
 
+# -- Container security context
 securityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
@@ -36,9 +44,12 @@ securityContext:
       - ALL
 
 service:
+  # -- Service type
   type: ClusterIP
+  # -- Service port
   port: 8080
 
+# -- Resource limits and requests
 resources:
   limits:
     cpu: 500m
@@ -47,36 +58,45 @@ resources:
     cpu: 100m
     memory: 128Mi
 
+# -- Node selector for pod assignment
 nodeSelector: {}
 
+# -- Tolerations for pod assignment
 tolerations: []
 
+# -- Affinity rules for pod assignment
 affinity: {}
 
 # Proxy configuration
 proxy:
+  # -- Address the proxy listens on
   listenAddress: ":8080"
+  # -- Timeout for upstream queries
   queryTimeout: "30s"
+  # -- Maximum length of the X-Scope-OrgID header
   maxTenantHeaderLength: 8192
+  # -- Enable Prometheus metrics endpoint
   metricsEnabled: true
 
 # Authentication configuration
 auth:
+  # -- Enable bearer token authentication
   enabled: false
-  # Bearer tokens for authentication (store in a Secret for production use)
+  # -- Bearer tokens for authentication (use existingSecret for production)
   bearerTokens: []
-  # Reference to an existing secret containing bearer tokens
+  # -- Reference to an existing secret containing bearer tokens
   # existingSecret: ""
-  # Key in the existing secret that contains the tokens (comma-separated)
+  # -- Key in the existing secret that contains the tokens (comma-separated)
   # existingSecretKey: "tokens"
 
 # Logging configuration
 logging:
+  # -- Log level (debug, info, warn, error)
   level: "info"
+  # -- Log format (json, text)
   format: "json"
 
-# Cluster configurations
-# Each cluster can have Loki and/or Mimir endpoints configured
+# -- Cluster configurations. Each cluster can have Loki and/or Mimir endpoints configured
 clusters: []
 #  - name: prod-eu
 #    type: eks
@@ -89,10 +109,12 @@ clusters: []
 #      namespace: monitoring
 #      service: loki-gateway
 #      port: 80
+#      pathPrefix: /loki
 #    mimir:
 #      namespace: monitoring
 #      service: mimir-gateway
 #      port: 80
+#      pathPrefix: /prometheus
 #    tenants:
 #      includePatterns:
 #        - ".*"
@@ -102,23 +124,38 @@ clusters: []
 
 # ServiceMonitor for Prometheus Operator
 serviceMonitor:
+  # -- Enable ServiceMonitor for Prometheus Operator
   enabled: false
+  # -- Namespace for the ServiceMonitor (defaults to release namespace)
   namespace: ""
+  # -- Scrape interval
   interval: "30s"
+  # -- Scrape timeout
   scrapeTimeout: "10s"
+  # -- Additional labels for the ServiceMonitor
   labels: {}
 
 # Liveness and readiness probes
 probes:
   liveness:
+    # -- Enable liveness probe
     enabled: true
+    # -- Initial delay before liveness probe starts
     initialDelaySeconds: 5
+    # -- Period between liveness probe checks
     periodSeconds: 10
+    # -- Timeout for liveness probe
     timeoutSeconds: 5
+    # -- Number of failures before pod is restarted
     failureThreshold: 3
   readiness:
+    # -- Enable readiness probe
     enabled: true
+    # -- Initial delay before readiness probe starts
     initialDelaySeconds: 5
+    # -- Period between readiness probe checks
     periodSeconds: 10
+    # -- Timeout for readiness probe
     timeoutSeconds: 5
+    # -- Number of failures before pod is marked unready
     failureThreshold: 3
