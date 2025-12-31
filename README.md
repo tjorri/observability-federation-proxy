@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/tjorri/observability-federation-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/tjorri/observability-federation-proxy/actions/workflows/ci.yml)
 [![E2E](https://github.com/tjorri/observability-federation-proxy/actions/workflows/e2e.yaml/badge.svg)](https://github.com/tjorri/observability-federation-proxy/actions/workflows/e2e.yaml)
+[![codecov](https://codecov.io/gh/tjorri/observability-federation-proxy/branch/main/graph/badge.svg)](https://codecov.io/gh/tjorri/observability-federation-proxy)
 [![Release](https://img.shields.io/github/v/release/tjorri/observability-federation-proxy)](https://github.com/tjorri/observability-federation-proxy/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tjorri/observability-federation-proxy)](https://goreportcard.com/report/github.com/tjorri/observability-federation-proxy)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
