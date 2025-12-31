@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/smithy-go/middleware"
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -130,8 +132,9 @@ func (t *eksTokenTransport) getToken() (string, error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	// Return cached token if still valid (with 1 minute buffer)
-	if t.token != "" && time.Now().Add(time.Minute).Before(t.expiry) {
+	// Return cached token if still valid (with 10 second buffer)
+	// The presigned URL expires in 60 seconds, so we refresh at 50 seconds
+	if t.token != "" && time.Now().Add(10*time.Second).Before(t.expiry) {
 		return t.token, nil
 	}
 
@@ -142,18 +145,35 @@ func (t *eksTokenTransport) getToken() (string, error) {
 	}
 
 	t.token = token
-	// EKS tokens are valid for 15 minutes
-	t.expiry = time.Now().Add(14 * time.Minute)
+	// Presigned URL expires in 60 seconds
+	t.expiry = time.Now().Add(60 * time.Second)
 	return t.token, nil
 }
 
 func (t *eksTokenTransport) generateToken() (string, error) {
 	presignClient := sts.NewPresignClient(t.stsClient)
 
-	// Create presigned GetCallerIdentity request with cluster name header
+	// Token expiry in seconds (matches AWS CLI behavior)
+	const tokenExpiry = 60
+
+	// Create presigned GetCallerIdentity request with cluster name header and expiry
 	presignedReq, err := presignClient.PresignGetCallerIdentity(context.Background(), &sts.GetCallerIdentityInput{}, func(opt *sts.PresignOptions) {
 		opt.ClientOptions = append(opt.ClientOptions, func(o *sts.Options) {
+			// Add the x-k8s-aws-id header (required by EKS)
 			o.APIOptions = append(o.APIOptions, smithyhttp.AddHeaderValue("x-k8s-aws-id", t.clusterName))
+			// Add X-Amz-Expires query parameter before signing
+			o.APIOptions = append(o.APIOptions, func(stack *middleware.Stack) error {
+				return stack.Build.Add(middleware.BuildMiddlewareFunc("AddPresignExpires", func(
+					ctx context.Context, in middleware.BuildInput, next middleware.BuildHandler,
+				) (middleware.BuildOutput, middleware.Metadata, error) {
+					if req, ok := in.Request.(*smithyhttp.Request); ok {
+						query := req.URL.Query()
+						query.Set("X-Amz-Expires", strconv.Itoa(tokenExpiry))
+						req.URL.RawQuery = query.Encode()
+					}
+					return next.HandleBuild(ctx, in)
+				}), middleware.Before)
+			})
 		})
 	})
 	if err != nil {

@@ -123,16 +123,33 @@ func (c *Client) ProxyRequest(ctx context.Context, req *Request) (*Response, err
 	// Get raw response
 	rawBody, err := result.Raw()
 	if err != nil {
-		// Try to get status code from error
-		statusCode := http.StatusBadGateway
-		if result.Error() != nil {
-			log.Error().Err(err).Msg("proxy request failed")
+		// Try to get status code from the result
+		var statusCode int
+		result.StatusCode(&statusCode)
+		if statusCode == 0 {
+			statusCode = http.StatusBadGateway
 		}
+
+		// Build a more informative error message
+		errMsg := err.Error()
+		if errMsg == "" && len(rawBody) > 0 {
+			errMsg = string(rawBody)
+		}
+		if errMsg == "" {
+			errMsg = fmt.Sprintf("upstream returned status %d", statusCode)
+		}
+
+		log.Error().
+			Err(err).
+			Int("status_code", statusCode).
+			Str("response_body", string(rawBody)).
+			Msg("proxy request failed")
+
 		return &Response{
 			StatusCode: statusCode,
 			Body:       rawBody,
 			Headers:    make(http.Header),
-		}, err
+		}, fmt.Errorf("%s", errMsg)
 	}
 
 	// Get status code
