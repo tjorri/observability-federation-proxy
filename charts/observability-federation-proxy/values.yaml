@@ -3,7 +3,7 @@
 replicaCount: 1
 
 image:
-  repository: observability-federation-proxy
+  repository: ghcr.io/tjorri/observability-federation-proxy
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
