@@ -143,6 +143,7 @@ clusters:
 | clusterSecrets.existingSecret | string | `""` | Reference to an existing secret containing kubeconfig files (alternative to create) |
 | clusterSecrets.kubeconfigs | object | `{}` | Kubeconfig contents keyed by name. Each key becomes a file in /etc/kubeconfigs/. For production, use existingSecret with External Secrets Operator or sealed-secrets instead. |
 | clusters | list | `[]` | Cluster configurations. Each cluster can have Loki and/or Mimir endpoints configured. For kubeconfig clusters, reference the kubeconfig by path from clusterSecrets. |
+| extraEnv | list | `[]` | Extra environment variables to add to the container Example:   extraEnv:     - name: AWS_REGION       value: "eu-west-1"     - name: AWS_ACCESS_KEY_ID       valueFrom:         secretKeyRef:           name: aws-credentials           key: access-key-id |
 | fullnameOverride | string | `""` | Override the full name of the chart |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"ghcr.io/tjorri/observability-federation-proxy"` | Image repository |

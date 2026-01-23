@@ -77,8 +77,9 @@ spec:
               mountPath: /etc/kubeconfigs
               readOnly: true
             {{- end }}
-          {{- if .Values.auth.enabled }}
+          {{- if or .Values.auth.enabled .Values.extraEnv }}
           env:
+            {{- if .Values.auth.enabled }}
             - name: AUTH_BEARER_TOKENS
               valueFrom:
                 secretKeyRef:
@@ -89,6 +90,10 @@ spec:
                   name: {{ include "observability-federation-proxy.fullname" . }}
                   key: bearer-tokens
                   {{- end }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
       volumes:
         - name: config
