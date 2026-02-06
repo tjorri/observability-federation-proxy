@@ -16,12 +16,14 @@ import (
 type mockProxyClient struct {
 	lastPath    string
 	lastHeaders http.Header
+	lastForm    url.Values
 	response    []byte
 	statusCode  int
 }
 
 func (m *mockProxyClient) ProxyHTTP(_ context.Context, w http.ResponseWriter, r *http.Request, pathPrefix string, opts *proxy.HTTPOptions) {
 	m.lastPath = strings.TrimPrefix(r.URL.Path, pathPrefix)
+	m.lastForm = r.Form
 	if opts != nil {
 		m.lastHeaders = opts.AdditionalHeaders
 	}
@@ -260,6 +262,79 @@ func TestRouter_PostQuery(t *testing.T) {
 				t.Errorf("POST form data should be parsed, but got: %s", resp["error"])
 			}
 		}
+	}
+}
+
+func TestRouter_PostQueryRange_FormDataPreserved(t *testing.T) {
+	mockClient := &mockProxyClient{}
+	router := NewRouter(RouterConfig{
+		Clients: map[string]ProxyClient{
+			"test-cluster": mockClient,
+		},
+	})
+
+	mux := http.NewServeMux()
+	router.RegisterRoutes(mux, "/clusters/{cluster}/loki")
+
+	form := url.Values{}
+	form.Set("query", `{job="app"}`)
+	form.Set("start", "1609459200")
+	form.Set("end", "1609545600")
+
+	req := httptest.NewRequest(http.MethodPost, "/clusters/test-cluster/loki/api/v1/query_range", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d; body: %s", w.Code, w.Body.String())
+	}
+
+	if mockClient.lastForm == nil {
+		t.Fatal("expected form data to be preserved, got nil")
+	}
+	if got := mockClient.lastForm.Get("query"); got != `{job="app"}` {
+		t.Errorf("expected form query preserved, got %q", got)
+	}
+	if got := mockClient.lastForm.Get("start"); got != "1609459200" {
+		t.Errorf("expected form start=1609459200, got %q", got)
+	}
+	if got := mockClient.lastForm.Get("end"); got != "1609545600" {
+		t.Errorf("expected form end=1609545600, got %q", got)
+	}
+}
+
+func TestRouter_PostQuery_FormDataPreserved(t *testing.T) {
+	mockClient := &mockProxyClient{}
+	router := NewRouter(RouterConfig{
+		Clients: map[string]ProxyClient{
+			"test-cluster": mockClient,
+		},
+	})
+
+	mux := http.NewServeMux()
+	router.RegisterRoutes(mux, "/clusters/{cluster}/loki")
+
+	form := url.Values{}
+	form.Set("query", `{job="app"}`)
+	form.Set("time", "1609459200")
+
+	req := httptest.NewRequest(http.MethodPost, "/clusters/test-cluster/loki/api/v1/query", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d; body: %s", w.Code, w.Body.String())
+	}
+
+	if mockClient.lastForm == nil {
+		t.Fatal("expected form data to be preserved, got nil")
+	}
+	if got := mockClient.lastForm.Get("query"); got != `{job="app"}` {
+		t.Errorf("expected form query preserved, got %q", got)
 	}
 }
 

@@ -197,11 +197,25 @@ func (c *Client) ProxyHTTP(ctx context.Context, w http.ResponseWriter, r *http.R
 		}
 	}
 
+	// Use r.Form if available (populated by ParseForm() for POST form data),
+	// otherwise use URL query parameters only.
+	// When Form is set, ParseForm() has consumed the body, so we send params
+	// via URL query string and clear the body and Content-Type to avoid sending
+	// a misleading empty form-encoded body.
+	var queryParams url.Values
+	if r.Form != nil {
+		queryParams = r.Form
+		body = nil
+		headers.Del("Content-Type")
+	} else {
+		queryParams = r.URL.Query()
+	}
+
 	// Build proxy request
 	req := &Request{
 		Method:  r.Method,
 		Path:    path,
-		Query:   r.URL.Query(),
+		Query:   queryParams,
 		Headers: headers,
 		Body:    body,
 	}

@@ -105,7 +105,7 @@ func (r *Router) handleQuery(w http.ResponseWriter, req *http.Request) {
 		Str("time", req.Form.Get("time")).
 		Msg("mimir query request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/query")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleQueryRange handles /api/v1/query_range requests (range query).
@@ -146,7 +146,7 @@ func (r *Router) handleQueryRange(w http.ResponseWriter, req *http.Request) {
 		Str("step", req.Form.Get("step")).
 		Msg("mimir query_range request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/query_range")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleLabels handles /api/v1/labels requests.
@@ -165,7 +165,7 @@ func (r *Router) handleLabels(w http.ResponseWriter, req *http.Request) {
 		Str("cluster", clusterName).
 		Msg("mimir labels request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/labels")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleLabelValues handles /api/v1/label/{name}/values requests.
@@ -191,7 +191,7 @@ func (r *Router) handleLabelValues(w http.ResponseWriter, req *http.Request) {
 		Str("label", labelName).
 		Msg("mimir label values request")
 
-	r.proxyRequest(w, req, clusterName, client, fmt.Sprintf("/api/v1/label/%s/values", labelName))
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleSeries handles /api/v1/series requests.
@@ -222,7 +222,7 @@ func (r *Router) handleSeries(w http.ResponseWriter, req *http.Request) {
 		Strs("match", matches).
 		Msg("mimir series request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/series")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleMetadata handles /api/v1/metadata requests.
@@ -242,7 +242,7 @@ func (r *Router) handleMetadata(w http.ResponseWriter, req *http.Request) {
 		Str("metric", req.URL.Query().Get("metric")).
 		Msg("mimir metadata request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/metadata")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleQueryExemplars handles /api/v1/query_exemplars requests.
@@ -273,7 +273,7 @@ func (r *Router) handleQueryExemplars(w http.ResponseWriter, req *http.Request) 
 		Str("query", query).
 		Msg("mimir query_exemplars request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/query_exemplars")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleRemoteRead handles /api/v1/read requests (Prometheus remote read protocol).
@@ -290,7 +290,7 @@ func (r *Router) handleRemoteRead(w http.ResponseWriter, req *http.Request) {
 		Str("cluster", clusterName).
 		Msg("mimir remote read request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/read")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleGenericProxy handles any other Mimir API requests.
@@ -315,26 +315,19 @@ func (r *Router) handleGenericProxy(w http.ResponseWriter, req *http.Request) {
 		Str("path", path).
 		Msg("mimir generic proxy request")
 
-	r.proxyRequest(w, req, clusterName, client, path)
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // proxyRequest proxies a request to the Mimir backend.
-func (r *Router) proxyRequest(w http.ResponseWriter, req *http.Request, clusterName string, client ProxyClient, path string) {
+func (r *Router) proxyRequest(w http.ResponseWriter, req *http.Request, clusterName string, client ProxyClient) {
 	// Build path prefix for stripping
 	pathPrefix := fmt.Sprintf("/clusters/%s/mimir", clusterName)
 
 	// Build proxy options with X-Scope-OrgID header
 	opts := r.buildProxyOptions(clusterName)
 
-	// Override the path if specified
-	if path != "" {
-		// Create a modified request with the correct path
-		newReq := req.Clone(req.Context())
-		newReq.URL.Path = pathPrefix + path
-		client.ProxyHTTP(req.Context(), w, newReq, pathPrefix, opts)
-	} else {
-		client.ProxyHTTP(req.Context(), w, req, pathPrefix, opts)
-	}
+	// Pass the original request (don't clone) to preserve parsed form data
+	client.ProxyHTTP(req.Context(), w, req, pathPrefix, opts)
 }
 
 // buildProxyOptions builds proxy options with tenant headers.

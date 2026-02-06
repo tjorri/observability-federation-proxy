@@ -103,7 +103,7 @@ func (r *Router) handleQuery(w http.ResponseWriter, req *http.Request) {
 		Str("time", req.Form.Get("time")).
 		Msg("loki query request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/query")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleQueryRange handles /api/v1/query_range requests.
@@ -144,7 +144,7 @@ func (r *Router) handleQueryRange(w http.ResponseWriter, req *http.Request) {
 		Str("step", req.Form.Get("step")).
 		Msg("loki query_range request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/query_range")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleLabels handles /api/v1/labels requests.
@@ -163,7 +163,7 @@ func (r *Router) handleLabels(w http.ResponseWriter, req *http.Request) {
 		Str("cluster", clusterName).
 		Msg("loki labels request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/labels")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleLabelValues handles /api/v1/label/{name}/values requests.
@@ -189,7 +189,7 @@ func (r *Router) handleLabelValues(w http.ResponseWriter, req *http.Request) {
 		Str("label", labelName).
 		Msg("loki label values request")
 
-	r.proxyRequest(w, req, clusterName, client, fmt.Sprintf("/api/v1/label/%s/values", labelName))
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleSeries handles /api/v1/series requests.
@@ -220,7 +220,7 @@ func (r *Router) handleSeries(w http.ResponseWriter, req *http.Request) {
 		Strs("match", matches).
 		Msg("loki series request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/series")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleIndexStats handles /api/v1/index/stats requests.
@@ -237,7 +237,7 @@ func (r *Router) handleIndexStats(w http.ResponseWriter, req *http.Request) {
 		Str("cluster", clusterName).
 		Msg("loki index stats request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/index/stats")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleTail handles /api/v1/tail requests (log streaming).
@@ -267,7 +267,7 @@ func (r *Router) handleTail(w http.ResponseWriter, req *http.Request) {
 		Str("query", query).
 		Msg("loki tail request")
 
-	r.proxyRequest(w, req, clusterName, client, "/api/v1/tail")
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // handleGenericProxy handles any other Loki API requests.
@@ -292,26 +292,19 @@ func (r *Router) handleGenericProxy(w http.ResponseWriter, req *http.Request) {
 		Str("path", path).
 		Msg("loki generic proxy request")
 
-	r.proxyRequest(w, req, clusterName, client, path)
+	r.proxyRequest(w, req, clusterName, client)
 }
 
 // proxyRequest proxies a request to the Loki backend.
-func (r *Router) proxyRequest(w http.ResponseWriter, req *http.Request, clusterName string, client ProxyClient, path string) {
+func (r *Router) proxyRequest(w http.ResponseWriter, req *http.Request, clusterName string, client ProxyClient) {
 	// Build path prefix for stripping
 	pathPrefix := fmt.Sprintf("/clusters/%s/loki", clusterName)
 
 	// Build proxy options with X-Scope-OrgID header
 	opts := r.buildProxyOptions(clusterName)
 
-	// Override the path if specified
-	if path != "" {
-		// Create a modified request with the correct path
-		newReq := req.Clone(req.Context())
-		newReq.URL.Path = pathPrefix + path
-		client.ProxyHTTP(req.Context(), w, newReq, pathPrefix, opts)
-	} else {
-		client.ProxyHTTP(req.Context(), w, req, pathPrefix, opts)
-	}
+	// Pass the original request (don't clone) to preserve parsed form data
+	client.ProxyHTTP(req.Context(), w, req, pathPrefix, opts)
 }
 
 // buildProxyOptions builds proxy options with tenant headers.
