@@ -4,8 +4,8 @@ description: >-
   A Helm chart for the Observability Federation Proxy - enables centralized
   Grafana to query Loki/Mimir across multiple Kubernetes clusters
 type: application
-version: 0.0.6
-appVersion: 0.0.6
+version: 0.0.7
+appVersion: 0.0.7
 keywords:
   - observability
   - monitoring
