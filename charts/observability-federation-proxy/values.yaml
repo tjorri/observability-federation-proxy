@@ -29,6 +29,9 @@ serviceAccount:
 # -- Annotations to add to the pod
 podAnnotations: {}
 
+# -- Labels to add to all resources created by this chart
+commonLabels: {}
+
 # -- Pod security context
 podSecurityContext:
   runAsNonRoot: true

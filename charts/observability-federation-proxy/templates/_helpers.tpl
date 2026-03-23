@@ -40,6 +40,9 @@ helm.sh/chart: {{ include "observability-federation-proxy.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.commonLabels }}
+{{ toYaml . }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -48,6 +51,16 @@ Selector labels
 {{- define "observability-federation-proxy.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "observability-federation-proxy.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Pod labels
+*/}}
+{{- define "observability-federation-proxy.podLabels" -}}
+{{ include "observability-federation-proxy.selectorLabels" . }}
+{{- with .Values.commonLabels }}
+{{ toYaml . }}
+{{- end }}
 {{- end }}
 
 {{/*
